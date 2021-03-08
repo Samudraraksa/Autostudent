@@ -44,15 +44,23 @@
               <div class="col s12">
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="join">JOIN CLASS</button>
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="leave">LEAVE CLASS</button> 
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="webcam">WEBCAM</button>
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="avatar">AVATAR</button>                
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="webcam" onclick="changeVideo('video_stream')">WEBCAM</button>
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_front" onclick="changeVideo('avatar_front')">FRONT</button>                
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_left" onclick="changeVideo('avatar_left')">LEFT</button> 
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_back" onclick="changeVideo('avatar_back')">BACK</button> 
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_right" onclick="changeVideo('avatar_right')">RIGHT</button> 
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_top" onclick="changeVideo('avatar_top')">TOP</button> 
               </div>
                <div class="col s7">
         <div class="video-grid" id="video">
           <div class="video-view">
             <div>
               <video id="video_stream" src="./assets/webcam.mp4" class="video-view" autoplay  loop = true></video>
-              <video id="avatar_stream" src="./assets/avatar_side.mp4" class="video-view" autoplay loop = true></video>
+              <video id="avatar_front" src="./assets/avatar_front.mp4" class="video-view" autoplay loop = true ></video>
+              <video id="avatar_left" src="./assets/avatar_left.mp4" class="video-view" autoplay loop = true></video>
+              <video id="avatar_back" src="./assets/avatar_back.mp4" class="video-view" autoplay loop = true></video>
+              <video id="avatar_right" src="./assets/avatar_right.mp4" class="video-view" autoplay loop = true></video>
+              <video id="avatar_top" src="./assets/avatar_top.mp4" class="video-view" autoplay loop = true></video>
               <!---Step 1-->
               <canvas id="canvas_video" width="720" height="480"></canvas>
               <!---End step 1-->
@@ -449,6 +457,29 @@
       })
     }
 
+    function changeVideo(videoName){
+        const canvas = $('#canvas_video')[0]
+        const ctx = canvas.getContext('2d')
+        const video = $('#'+videoName)[0]
+        const width = 720
+        const height = 480
+        function step() {
+            ctx.drawImage(video, 0, 0, width, height)
+            requestAnimationFrame(step)
+          }
+        video.play();
+        pauseOtherVideo(videoName)
+        requestAnimationFrame(step)
+    }
+    const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
+    function pauseOtherVideo(videoName){
+        videoNames.forEach(element => {
+          if(element!==videoName){
+            const video = $('#'+element)[0]
+            video.pause();
+          }
+        });
+    }
     // This function automatically executes when a document is ready.
     $(function () {
         
@@ -473,22 +504,7 @@
             text: resolution.name
           }).appendTo("#cameraResolution")
         })
-        /**
-         * Step 2
-         */
-        /*const canvas = $('#canvas_video')[0]
-        const ctx = canvas.getContext('2d')
-        const video = $('#video_stream')[0]
-        const width = 720
-        const height = 480
-        video.addEventListener('play', () => {
-          function step() {
-            ctx.drawImage(video, 0, 0, width, height)
-            requestAnimationFrame(step)
-          }
-          requestAnimationFrame(step)
-        })*/
-        /***End Step 2 */
+        
         M.AutoInit()
       })
 
@@ -512,38 +528,7 @@
           leave(rtc)
         }
       })
-
-      $("#webcam").on("click", function () {
-        console.log("webcam")
-        const canvas = $('#canvas_video')[0]
-        const ctx = canvas.getContext('2d')
-        const video = $('#video_stream')[0]
-        const width = 720
-        const height = 480
-        function step() {
-            ctx.drawImage(video, 0, 0, width, height)
-            requestAnimationFrame(step)
-          }
-          video.play();
-        requestAnimationFrame(step)
-      })
-
-      $("#avatar").on("click", function () {
-        console.log("avatar stream")
-        const canvas = $('#canvas_video')[0]
-        const ctx = canvas.getContext('2d')
-        const video = $('#video_stream')[0]
-        const avatar_video = $('#avatar_stream')[0]
-        const width = 720
-        const height = 480
-        function step() {
-            ctx.drawImage(avatar_video, 0, 0, width, height)
-            requestAnimationFrame(step)
-          }
-          avatar_video.play();
-          video.pause();
-        requestAnimationFrame(step)
-      })
+      
     });
       
   </script>
