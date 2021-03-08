@@ -44,8 +44,8 @@
               <div class="col s12">
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="join">JOIN CLASS</button>
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="leave">LEAVE CLASS</button> 
-                <button class="btn btn-raised btn-primary waves-effect waves-light" id="webcam">WEBCAM</button>
-                <button class="btn btn-raised btn-primary waves-effect waves-light" id="avatar">AVATAR</button>                
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="webcam">WEBCAM</button>
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="avatar">AVATAR</button>                
               </div>
                <div class="col s7">
         <div class="video-grid" id="video">
@@ -476,19 +476,18 @@
         /**
          * Step 2
          */
-        const canvas = $('#canvas_video')[0]
+        /*const canvas = $('#canvas_video')[0]
         const ctx = canvas.getContext('2d')
         const video = $('#video_stream')[0]
         const width = 720
         const height = 480
-        //console.log(video)
         video.addEventListener('play', () => {
           function step() {
             ctx.drawImage(video, 0, 0, width, height)
             requestAnimationFrame(step)
           }
           requestAnimationFrame(step)
-        })
+        })*/
         /***End Step 2 */
         M.AutoInit()
       })
@@ -516,10 +515,35 @@
 
       $("#webcam").on("click", function () {
         console.log("webcam")
-        
+        const canvas = $('#canvas_video')[0]
+        const ctx = canvas.getContext('2d')
+        const video = $('#video_stream')[0]
+        const width = 720
+        const height = 480
+        function step() {
+            ctx.drawImage(video, 0, 0, width, height)
+            requestAnimationFrame(step)
+          }
+          video.play();
+        requestAnimationFrame(step)
       })
 
-
+      $("#avatar").on("click", function () {
+        console.log("avatar stream")
+        const canvas = $('#canvas_video')[0]
+        const ctx = canvas.getContext('2d')
+        const video = $('#video_stream')[0]
+        const avatar_video = $('#avatar_stream')[0]
+        const width = 720
+        const height = 480
+        function step() {
+            ctx.drawImage(avatar_video, 0, 0, width, height)
+            requestAnimationFrame(step)
+          }
+          avatar_video.play();
+          video.pause();
+        requestAnimationFrame(step)
+      })
     });
       
   </script>
