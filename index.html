@@ -18,7 +18,7 @@
   </div>
   <form id="form" class="row col l12 s12">
     <div class="row container col l12 s12">
-      <div class="col" style="min-width: 7200px; max-width: 10240px">
+      <div class="col" style="min-width: 720px; max-width: 960px">
         <div class="card" style="margin-top: 0px; margin-bottom: 0px;">
           <div class="row card-content" style="margin-bottom: 0px;">
               <div>
@@ -53,24 +53,25 @@
               </div>
                <div class="col s7">
         <div class="video-grid" id="video">
+          
+        </div>
+      </div>
+          </div>
           <div class="video-view">
+             <!---Step 1-->
+            <canvas id="canvas_video" width="720" height="480"></canvas>
+            <!---End step 1-->
             <div>
-              <video id="video_stream" src="./assets/webcam.mp4" class="video-view" autoplay  loop = true></video>
-              <video id="avatar_front" src="./assets/avatar_front.mp4" class="video-view" autoplay loop = true ></video>
-              <video id="avatar_left" src="./assets/avatar_left.mp4" class="video-view" autoplay loop = true></video>
-              <video id="avatar_back" src="./assets/avatar_back.mp4" class="video-view" autoplay loop = true></video>
-              <video id="avatar_right" src="./assets/avatar_right.mp4" class="video-view" autoplay loop = true></video>
-              <video id="avatar_top" src="./assets/avatar_top.mp4" class="video-view" autoplay loop = true></video>
-              <!---Step 1-->
-              <canvas id="canvas_video" width="720" height="480"></canvas>
-              <!---End step 1-->
+              <video id="video_stream" src="./assets/webcam.mp4" class="col s12" autoplay  loop = true></video>
+              <video id="avatar_front" src="./assets/avatar_front.mp4" class="col s12" autoplay loop = true ></video>
+              <video id="avatar_left" src="./assets/avatar_left.mp4" class="col s12" autoplay loop = true></video>
+              <video id="avatar_back" src="./assets/avatar_back.mp4" class="col s12" autoplay loop = true></video>
+              <video id="avatar_right" src="./assets/avatar_right.mp4" class="col s12" autoplay loop = true></video>
+              <video id="avatar_top" src="./assets/avatar_top.mp4" class="col s12" autoplay loop = true></video>
             </div>
             <div id="local_stream" class="video-placeholder"></div>
             <div id="local_video_info" class="video-profile hide"></div>
             <div id="video_autoplay_local" class="autoplay-fallback hide"></div>
-          </div>
-        </div>
-      </div>
           </div>
         </div>
       </div>
@@ -276,7 +277,7 @@
         var remoteStream = evt.stream
         var id = remoteStream.getId()
         rtc.remoteStreams.push(remoteStream)
-        addView(id)
+       // addView(id)
         remoteStream.play("remote_video_" + id)
         Toast.info("stream-subscribed remote-uid: " + id)
         console.log("stream-subscribed remote-uid: ", id)
@@ -330,7 +331,6 @@
         //var StreamVideo = document.getElementById('copy_stream');
         console.log(RealVideo);
         var stream = RealVideo.captureStream(60);
-        //StreamVideo.srcObject = stream;
         /* step 4 */
         rtc.localStream = AgoraRTC.createStream({
             streamID: rtc.params.uid,
@@ -468,7 +468,7 @@
             requestAnimationFrame(step)
           }
         video.play();
-        pauseOtherVideo(videoName)
+        //pauseOtherVideo(videoName)
         requestAnimationFrame(step)
     }
     const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
@@ -482,6 +482,18 @@
     }
     // This function automatically executes when a document is ready.
     $(function () {
+      // Create WebSocket connection.
+      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/{0}/{1}');
+
+      // Connection opened
+      socket.addEventListener('open', function (event) {
+      socket.send('Hello Server!');
+      });
+
+      // Listen for messages
+      socket.addEventListener('message', function (event) {
+      console.log('Message from server ', event.data);
+      });
         
       // This will fetch all the devices and will populate the UI for every device. (Audio and Video)
       getDevices(function (devices) {
