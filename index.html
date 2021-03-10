@@ -44,12 +44,6 @@
               <div class="col s12">
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="join">JOIN CLASS</button>
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="leave">LEAVE CLASS</button> 
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="webcam" onclick="changeVideo('video_stream')">WEBCAM</button>
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_front" onclick="changeVideo('avatar_front')">FRONT</button>                
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_left" onclick="changeVideo('avatar_left')">LEFT</button> 
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_back" onclick="changeVideo('avatar_back')">BACK</button> 
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_right" onclick="changeVideo('avatar_right')">RIGHT</button> 
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="btn_avatar_top" onclick="changeVideo('avatar_top')">TOP</button> 
               </div>
                <div class="col s7">
         <div class="video-grid" id="video">
@@ -472,6 +466,7 @@
         requestAnimationFrame(step)
     }
     const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
+
     function pauseOtherVideo(videoName){
         videoNames.forEach(element => {
           if(element!==videoName){
@@ -483,17 +478,72 @@
     // This function automatically executes when a document is ready.
     $(function () {
       // Create WebSocket connection.
-      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/{0}/{1}');
+      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/TSLive9000003/8000345');
+      var joined = false;
 
       // Connection opened
       socket.addEventListener('open', function (event) {
-      socket.send('Hello Server!');
+      console.log('Connected');
       });
 
-      // Listen for messages
-      socket.addEventListener('message', function (event) {
-      console.log('Message from server ', event.data);
-      });
+      // Listen for messages`
+      socket.onmessage = function (event) {
+        var msg = JSON.parse(event.data);
+
+        //Sniffing when teacher start
+        if (msg.type === "APP-STATE" && joined === false){
+          switch(msg.stage) {
+            case "warmup":
+              var params = serializeformData();
+              if (validator(params, fields)) {
+               join(rtc, params)
+              }
+              console.log("join NOW");
+              joined = true;
+            break;
+          }
+        }
+
+        if (msg.type === "SWITCHVIEW"){
+          switch(msg.value) {
+            case true:
+              changeVideo("avatar_front");
+            break;
+
+            case false:
+              changeVideo("video_stream");
+            break;
+          }
+        }
+
+        if (msg.type === "CAMERAVIEW"){
+          switch(msg.view) {
+            case 1:
+              changeVideo("avatar_front");
+            break;
+
+            case 2:
+              changeVideo("avatar_left");
+            break;
+
+            case 3:
+              changeVideo("avatar_back");
+            break;
+
+            case 4:
+              changeVideo("avatar_right");
+            break;
+
+            case 5:
+              changeVideo("avatar_top");
+            break;
+          }
+        }
+        
+        //console.log(event.data); 
+      }
+
+      changeVideo('video_stream');
         
       // This will fetch all the devices and will populate the UI for every device. (Audio and Video)
       getDevices(function (devices) {
