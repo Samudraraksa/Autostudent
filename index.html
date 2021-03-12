@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Basic Communication</title>
+  <title>PIVOT LIVE Autostudent</title>
   <link rel="stylesheet" href="./assets/common.css" />
 </head>
 
@@ -23,7 +23,7 @@
           <div class="row card-content" style="margin-bottom: 0px;">
               <div>
               <form action="/action_page.php">
-                <label for="channel">Select Teacher :</label>
+                <label for="channel">Select Teacher and press READY :</label>
                 <select id="channel" name="channel">
                 <option value="TSLive9000001">Yoga Test</option>
                 <option value="TSLive9000002">Molly Grace</option>
@@ -42,7 +42,7 @@
               </div>
             <div class="row" style="margin: 0">
               <div class="col s12">
-                <button class="btn btn-raised btn-primary waves-effect waves-light" id="join">JOIN CLASS</button>
+                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="listen" onclick="createWebsocket('TSLive9000003',serializeformData())">READY</button>
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="leave">LEAVE CLASS</button> 
               </div>
                <div class="col s7">
@@ -337,7 +337,7 @@
           //console.log("test");
           //sconsole.log(stream);
 
-        rtc.client.join(option.token ? option.token : null, option.channel, 8000345, function (uid) {   
+        rtc.client.join(option.token ? option.token : null, option.channel, 358, function (uid) {   
             
           Toast.notice("join channel: " + option.channel + " success, uid: " + uid)
           console.log("join channel: " + option.channel + " success, uid: " + uid)
@@ -451,39 +451,15 @@
       })
     }
 
-    function changeVideo(videoName){
-        const canvas = $('#canvas_video')[0]
-        const ctx = canvas.getContext('2d')
-        const video = $('#'+videoName)[0]
-        const width = 720
-        const height = 480
-        function step() {
-            ctx.drawImage(video, 0, 0, width, height)
-            requestAnimationFrame(step)
-          }
-        video.play();
-        //pauseOtherVideo(videoName)
-        requestAnimationFrame(step)
-    }
-    const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
-
-    function pauseOtherVideo(videoName){
-        videoNames.forEach(element => {
-          if(element!==videoName){
-            const video = $('#'+element)[0]
-            video.pause();
-          }
-        });
-    }
-    // This function automatically executes when a document is ready.
-    $(function () {
+    function createWebsocket(channel,parameter){
       // Create WebSocket connection.
-      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/TSLive9000003/8000345');
+      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/' + parameter.channel + '/358');
       var joined = false;
+      Toast.info("Ready for Teacher ID: " + parameter.channel)
 
       // Connection opened
       socket.addEventListener('open', function (event) {
-      console.log('Connected');
+      console.log('Connected' + parameter.channel );
       });
 
       // Listen for messages`
@@ -492,14 +468,25 @@
 
         //Sniffing when teacher start
         if (msg.type === "APP-STATE" && joined === false){
-          switch(msg.stage) {
+         switch(msg.stage) {
             case "warmup":
-              var params = serializeformData();
-              if (validator(params, fields)) {
-               join(rtc, params)
-              }
-              console.log("join NOW");
+              join(rtc, parameter);
               joined = true;
+              console.log("join NOW");
+              changeVideo("video_stream");
+            break; 
+          }
+        }
+
+        if (msg.type === "CLASSSTATE"){
+         switch(msg.value) {
+            case "warmup":
+              changeVideo("video_stream");
+            break; 
+
+            case "end":
+              joined = false;
+              leave(rtc)
             break;
           }
         }
@@ -539,11 +526,38 @@
             break;
           }
         }
-        
-        //console.log(event.data); 
       }
+    }
 
-      changeVideo('video_stream');
+    function changeVideo(videoName){
+        const canvas = $('#canvas_video')[0]
+        const ctx = canvas.getContext('2d')
+        const video = $('#'+videoName)[0]
+        const width = 720
+        const height = 480
+        function step() {
+            ctx.drawImage(video, 0, 0, width, height)
+            requestAnimationFrame(step)
+          }
+        video.play();
+        pauseOtherVideo(videoName)
+        requestAnimationFrame(step)
+    }
+    const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
+
+    function pauseOtherVideo(videoName){
+        videoNames.forEach(element => {
+          if(element!==videoName){
+            const video = $('#'+element)[0]
+            video.pause();
+          }
+        });
+    }
+    // This function automatically executes when a document is ready.
+    $(function () {
+      
+
+      //changeVideo('video_stream');
         
       // This will fetch all the devices and will populate the UI for every device. (Audio and Video)
       getDevices(function (devices) {
@@ -566,7 +580,6 @@
             text: resolution.name
           }).appendTo("#cameraResolution")
         })
-        
         M.AutoInit()
       })
 
