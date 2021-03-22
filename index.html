@@ -21,28 +21,20 @@
       <div class="col" style="min-width: 720px; max-width: 960px">
         <div class="card" style="margin-top: 0px; margin-bottom: 0px;">
           <div class="row card-content" style="margin-bottom: 0px;">
-              <div>
+             <!--  <div>
               <form action="/action_page.php">
                 <label for="channel">Select Teacher and press READY :</label>
                 <select id="channel" name="channel">
-                <option value="TSLive9000001">Yoga Test</option>
+                <option value="coordinator">Yoga Coordinator</option>
                 <option value="TSLive9000002">Molly Grace</option>
                 <option value="TSLive9000003">Brett Larkin</option>
                 <option value="TSLive9000004">Kim Sin</option>
                 <option value="TSLive9000005">Briohny Smyth</option>
-                <option value="TSLive9000031">Gabriela Delgado</option>
-                <option value="TSLive9000032">Kirstin Patterson</option>
-                <option value="TSLive9000034">Deidre Fuller</option>
-                <option value="TSLive9000035">Ryann Myre</option>
-                <option value="TSLive9000037">Ariel Snyder</option>
-                <option value="TSLive9000038">Wade Lagrone</option>
-                <option value="TSLive9000039">Bryoni Lawrence</option>    
                   </select>
                 </form>
-              </div>
+              </div> -->
             <div class="row" style="margin: 0">
               <div class="col s12">
-                <button type="button" class="btn btn-raised btn-primary waves-effect waves-light" id="listen" onclick="createWebsocket('TSLive9000003',serializeformData())">READY</button>
                 <button class="btn btn-raised btn-primary waves-effect waves-light" id="leave">LEAVE CLASS</button> 
               </div>
                <div class="col s7">
@@ -94,6 +86,26 @@
         value: "1080p"
       }
     ]
+
+    var myVar = setInterval(Timeout ,60000);
+    var timer = ReseTimer();
+
+    function Timeout() {
+      var d = new Date();
+      var m = d.getMinutes(); 
+      var delay = m - timer; 
+      console.log( delay + ' Minute pass');
+      if (delay > 1 && rtc.client && rtc.joined) {
+          Toast.error("No More Channel")
+          leave(rtc);
+      }
+    }
+
+    function ReseTimer(){
+      var d = new Date();
+      var m = d.getMinutes();
+      return m;    
+    }
 
     function Toastify(options) {
       M.toast({ html: options.text, classes: options.classes })
@@ -247,12 +259,12 @@
           removeView(id)
         }
         Toast.notice("peer leave")
-        console.log("peer-leave", id)
+       // console.log("peer-leave", id)
       })
       // Occurs when the local stream is published.
       rtc.client.on("stream-published", function (evt) {
         Toast.notice("stream published success")
-        console.log("stream-published")
+        //console.log("stream-published")
       })
       // Occurs when the remote stream is added.
       rtc.client.on("stream-added", function (evt) {
@@ -264,7 +276,7 @@
             console.log("stream subscribe failed", err)
           })
         }
-        console.log("stream-added remote-uid: ", id)
+        //console.log("stream-added remote-uid: ", id)
       })
       // Occurs when a user subscribes to a remote stream.
       rtc.client.on("stream-subscribed", function (evt) {
@@ -274,7 +286,7 @@
        // addView(id)
         remoteStream.play("remote_video_" + id)
         Toast.info("stream-subscribed remote-uid: " + id)
-        console.log("stream-subscribed remote-uid: ", id)
+        //console.log("stream-subscribed remote-uid: ", id)
       })
       // Occurs when the remote stream is removed; for example, a peer user calls Client.unpublish.
       rtc.client.on("stream-removed", function (evt) {
@@ -294,13 +306,13 @@
         // After requesting a new token
         // rtc.client.renewToken(token);
         Toast.info("onTokenPrivilegeWillExpire")
-        console.log("onTokenPrivilegeWillExpire")
+        //console.log("onTokenPrivilegeWillExpire")
       })
       rtc.client.on("onTokenPrivilegeDidExpire", function () {
         // After requesting a new token
         // client.renewToken(token);
         Toast.info("onTokenPrivilegeDidExpire")
-        console.log("onTokenPrivilegeDidExpire")
+        //console.log("onTokenPrivilegeDidExpire")
       })
     }
 
@@ -337,7 +349,7 @@
           //console.log("test");
           //sconsole.log(stream);
 
-        rtc.client.join(option.token ? option.token : null, option.channel, 358, function (uid) {   
+        rtc.client.join( null, option, 358, function (uid) {   
             
           Toast.notice("join channel: " + option.channel + " success, uid: " + uid)
           console.log("join channel: " + option.channel + " success, uid: " + uid)
@@ -451,20 +463,42 @@
       })
     }
 
-    function createWebsocket(channel,parameter){
+    function Listening(){
       // Create WebSocket connection.
-      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/' + parameter.channel + '/358');
-      var joined = false;
-      Toast.info("Ready for Teacher ID: " + parameter.channel)
+      const socket = new WebSocket('wss://8i3654by0i.execute-api.us-west-2.amazonaws.com/autostudent');
+      Toast.info("Get Ready for any Teacher");
 
       // Connection opened
       socket.addEventListener('open', function (event) {
-      console.log('Connected' + parameter.channel );
+      console.log('Listening.....' );
       });
 
       // Listen for messages`
       socket.onmessage = function (event) {
         var msg = JSON.parse(event.data);
+        //console.log(msg);
+
+        createWebsocket('TSLive' + msg);
+      }
+    }
+
+    function createWebsocket(parameter){
+      // Create WebSocket connection.
+      const socket = new WebSocket('ws://execdev.turingsense.com/ws/class/' + parameter + '/358');
+      var joined = false;
+      Toast.info("Ready for Teacher ID: " + parameter)
+      changeVideo("video_stream");
+
+      // Connection opened
+      socket.addEventListener('open', function (event) {
+      console.log('Connected :' + parameter);
+      });
+
+      // Listen for messages`
+      socket.onmessage = function (event) {
+        var msg = JSON.parse(event.data);
+        //console.log(msg);
+        timer = ReseTimer();
 
         //Sniffing when teacher start
         if (msg.type === "APP-STATE" && joined === false){
@@ -491,7 +525,7 @@
           }
         }
 
-        if (msg.type === "SWITCHVIEW"){
+        if (msg.type === "SWITCHVIEW" && msg.student === 358){
           switch(msg.value) {
             case true:
               changeVideo("avatar_front");
@@ -503,7 +537,7 @@
           }
         }
 
-        if (msg.type === "CAMERAVIEW"){
+        if (msg.type === "CAMERAVIEW" && msg.id_student === 358){
           switch(msg.view) {
             case 1:
               changeVideo("avatar_front");
@@ -540,7 +574,7 @@
             requestAnimationFrame(step)
           }
         video.play();
-        pauseOtherVideo(videoName)
+       // pauseOtherVideo(videoName)
         requestAnimationFrame(step)
     }
     const videoNames=["video_stream","avatar_front","avatar_left","avatar_right","avatar_back","avatar_top"]
@@ -555,9 +589,10 @@
     }
     // This function automatically executes when a document is ready.
     $(function () {
-      
 
-      //changeVideo('video_stream');
+      Listening();
+
+     // changeVideo('video_stream');
         
       // This will fetch all the devices and will populate the UI for every device. (Audio and Video)
       getDevices(function (devices) {
