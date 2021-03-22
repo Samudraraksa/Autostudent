@@ -87,24 +87,23 @@
       }
     ]
 
-    var myVar = setInterval(Timeout ,60000);
+    var myVar = setInterval(Timeout ,10000);
     var timer = ReseTimer();
 
     function Timeout() {
       var d = new Date();
-      var m = d.getMinutes(); 
-      var delay = m - timer; 
-      console.log( delay + ' Minute pass');
-      if (delay > 1 && rtc.client && rtc.joined) {
+      var delay = d - timer; 
+      console.log( delay/1000 + ' sec pass');
+      if (delay > 180000 && rtc.client && rtc.joined) {
           Toast.error("No More Channel")
+          console.log('Quit.. ' + rtc.joined);
           leave(rtc);
       }
     }
 
     function ReseTimer(){
       var d = new Date();
-      var m = d.getMinutes();
-      return m;    
+      return d;    
     }
 
     function Toastify(options) {
@@ -477,7 +476,7 @@
       socket.onmessage = function (event) {
         var msg = JSON.parse(event.data);
         //console.log(msg);
-
+        timer = ReseTimer();
         createWebsocket('TSLive' + msg);
       }
     }
