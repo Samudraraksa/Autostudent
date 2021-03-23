@@ -586,11 +586,20 @@
           }
         });
     }
+
+    function connectToTeacherChannel(params){
+      var searchParams = new URLSearchParams(params);
+      var channelParam=searchParams.get("channel");
+      createWebsocket('TSLive' + channelParam);
+    }
     // This function automatically executes when a document is ready.
     $(function () {
-
-      Listening();
-
+      const params=window.location.search;
+      if(params.length>0){
+        connectToTeacherChannel(params);
+      }else{
+        Listening();
+      }
      // changeVideo('video_stream');
         
       // This will fetch all the devices and will populate the UI for every device. (Audio and Video)
